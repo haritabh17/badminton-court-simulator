@@ -117,7 +117,10 @@ export default function BadmintonCourt() {
       {/* Header */}
       <View style={styles.header}>
         <PaperIconButton icon="menu" size={24} iconColor="#000" onPress={() => setIsMenuVisible(true)} style={{ margin: 0 }} />
-        <PaperText style={styles.headerTitle}>Badminton Court Simulator</PaperText>
+        <View style={{ alignItems: 'center' }}>
+          <PaperText style={styles.headerTitle}>Badminton Court Simulator</PaperText>
+          <PaperText style={{ fontSize: 10, color: '#999' }}>beta-7</PaperText>
+        </View>
         <PaperIconButton icon="refresh" size={24} iconColor="#000" onPress={resetPositions} style={{ margin: 0 }} />
       </View>
 
