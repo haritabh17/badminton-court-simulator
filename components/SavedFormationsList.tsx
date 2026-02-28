@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, Alert, FlatList } from 'react-native';
-import { Card, Title, Text as PaperText, IconButton, Divider } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
+import { Card, Title, Text as PaperText, Divider } from 'react-native-paper';
 import { SavedFormation, listFormations, deleteFormation } from '../utils/formationStorage';
 
 interface SavedFormationsListProps {
@@ -67,10 +66,10 @@ export function SavedFormationsList({ onLoad, refreshTrigger }: SavedFormationsL
         <Card.Content>
           <Title>Saved Formations</Title>
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="folder-open-outline" size={40} color="#ccc" />
+            <Text style={{ fontSize: 40 }}>📂</Text>
             <PaperText style={styles.emptyText}>No saved formations yet</PaperText>
             <PaperText style={styles.emptySubtext}>
-              Tap the save icon in the top bar to save your current formation
+              Tap the 💾 button to save your current formation
             </PaperText>
           </View>
         </Card.Content>
@@ -87,11 +86,7 @@ export function SavedFormationsList({ onLoad, refreshTrigger }: SavedFormationsL
             {index > 0 && <Divider style={styles.divider} />}
             <View style={styles.formationItem}>
               <View style={styles.formationIcon}>
-                <MaterialCommunityIcons
-                  name={formation.isDoubles ? 'account-group' : 'account'}
-                  size={24}
-                  color="#666"
-                />
+                <Text style={{ fontSize: 20 }}>{formation.isDoubles ? '👥' : '👤'}</Text>
               </View>
               <View style={styles.formationInfo}>
                 <PaperText style={styles.formationName}>{formation.name}</PaperText>
@@ -100,18 +95,12 @@ export function SavedFormationsList({ onLoad, refreshTrigger }: SavedFormationsL
                 </PaperText>
               </View>
               <View style={styles.formationActions}>
-                <IconButton
-                  icon="play-circle-outline"
-                  size={24}
-                  iconColor="#2196F3"
-                  onPress={() => handleLoad(formation)}
-                />
-                <IconButton
-                  icon="delete-outline"
-                  size={24}
-                  iconColor="#f44336"
-                  onPress={() => handleDelete(formation)}
-                />
+                <TouchableOpacity onPress={() => handleLoad(formation)} style={styles.actionBtn}>
+                  <Text style={{ fontSize: 22 }}>▶️</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDelete(formation)} style={styles.actionBtn}>
+                  <Text style={{ fontSize: 22 }}>🗑️</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -169,6 +158,13 @@ const styles = StyleSheet.create({
   },
   formationActions: {
     flexDirection: 'row',
+    gap: 4,
+  },
+  actionBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   divider: {
     marginVertical: 4,
