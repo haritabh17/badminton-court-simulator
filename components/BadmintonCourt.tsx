@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert, Animated } from 'react-native';
-import { Text as PaperText } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text as PaperText, Icon } from 'react-native-paper';
 import { PlayerMarker } from './PlayerMarker';
 import { useCourtPositions } from '../hooks/useCourtPositions';
 import { PositionTrail } from './PositionTrail';
@@ -25,8 +24,8 @@ function TabButton({ icon, label, onPress, active, disabled }: {
       disabled={disabled}
       activeOpacity={0.6}
     >
-      <MaterialCommunityIcons
-        name={icon as any}
+      <Icon
+        source={icon}
         size={24}
         color={active ? '#2196F3' : disabled ? '#ccc' : '#8e8e93'}
       />
@@ -117,11 +116,11 @@ export default function BadmintonCourt() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.headerButton}>
-          <MaterialCommunityIcons name="menu" size={24} color="#000" />
+          <Icon source="menu" size={24} color="#000" />
         </TouchableOpacity>
         <PaperText style={styles.headerTitle}>Badminton Court Simulator</PaperText>
         <TouchableOpacity onPress={resetPositions} style={styles.headerButton}>
-          <MaterialCommunityIcons name="refresh" size={24} color="#000" />
+          <Icon source="refresh" size={24} color="#000" />
         </TouchableOpacity>
       </View>
 
@@ -219,7 +218,7 @@ export default function BadmintonCourt() {
         onPress={() => setIsSaveModalVisible(true)}
         activeOpacity={0.8}
       >
-        <MaterialCommunityIcons name="content-save" size={26} color="#fff" />
+        <Icon source="content-save" size={26} color="#fff" />
       </TouchableOpacity>
 
       {/* Bottom Tab Bar */}
