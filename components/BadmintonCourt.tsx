@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
-import { Text as PaperText, IconButton as PaperIconButton } from 'react-native-paper';
+import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert, Text } from 'react-native';
 import { PlayerMarker } from './PlayerMarker';
 import { useCourtPositions } from '../hooks/useCourtPositions';
 import { PositionTrail } from './PositionTrail';
@@ -9,9 +8,9 @@ import { useMarkerCustomization } from '../context/MarkerCustomizationContext';
 import { SaveFormationModal } from './SaveFormationModal';
 import { saveFormation, SavedFormation } from '../utils/formationStorage';
 
-// Telegram-style tab button
-function TabButton({ icon, label, onPress, active, disabled }: {
-  icon: string;
+// Tab button using emoji (no icon font dependency)
+function TabButton({ emoji, label, onPress, active, disabled }: {
+  emoji: string;
   label: string;
   onPress: () => void;
   active?: boolean;
@@ -24,19 +23,14 @@ function TabButton({ icon, label, onPress, active, disabled }: {
       disabled={disabled}
       activeOpacity={0.6}
     >
-      <PaperIconButton
-        icon={icon}
-        size={22}
-        iconColor={active ? '#2196F3' : disabled ? '#ccc' : '#8e8e93'}
-        style={{ margin: 0, padding: 0, width: 28, height: 28 }}
-      />
-      <PaperText style={[
+      <Text style={{ fontSize: 20, opacity: disabled ? 0.3 : 1 }}>{emoji}</Text>
+      <Text style={[
         styles.tabLabel,
         active && styles.tabLabelActive,
         disabled && styles.tabLabelDisabled,
       ]}>
         {label}
-      </PaperText>
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -116,12 +110,16 @@ export default function BadmintonCourt() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <PaperIconButton icon="menu" size={24} iconColor="#000" onPress={() => setIsMenuVisible(true)} style={{ margin: 0 }} />
+        <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.headerButton}>
+          <Text style={{ fontSize: 22 }}>☰</Text>
+        </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
-          <PaperText style={styles.headerTitle}>Badminton Court Simulator</PaperText>
-          <PaperText style={{ fontSize: 10, color: '#999' }}>beta-7</PaperText>
+          <Text style={styles.headerTitle}>Badminton Court Simulator</Text>
+          <Text style={{ fontSize: 10, color: '#999' }}>beta-8</Text>
         </View>
-        <PaperIconButton icon="refresh" size={24} iconColor="#000" onPress={resetPositions} style={{ margin: 0 }} />
+        <TouchableOpacity onPress={resetPositions} style={styles.headerButton}>
+          <Text style={{ fontSize: 20 }}>🔄</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Court */}
@@ -218,36 +216,36 @@ export default function BadmintonCourt() {
         onPress={() => setIsSaveModalVisible(true)}
         activeOpacity={0.8}
       >
-        <PaperIconButton icon="content-save" size={26} iconColor="#fff" style={{ margin: 0 }} />
+        <Text style={{ fontSize: 26, color: '#fff' }}>💾</Text>
       </TouchableOpacity>
 
       {/* Bottom Tab Bar */}
       <View style={styles.tabBar}>
         <TabButton
-          icon={isDoubles ? "account-group" : "account"}
+          emoji={isDoubles ? "👥" : "👤"}
           label={isDoubles ? "Doubles" : "Singles"}
           onPress={() => toggleGameMode(!isDoubles)}
         />
         <TabButton
-          icon="undo"
+          emoji="↩️"
           label="Undo"
           onPress={undo}
           disabled={!canUndo}
         />
         <TabButton
-          icon="redo"
+          emoji="↪️"
           label="Redo"
           onPress={redo}
           disabled={!canRedo}
         />
         <TabButton
-          icon="shoe-print"
+          emoji="👣"
           label="Trails"
           onPress={togglePlayerTrails}
           active={showPlayerTrails}
         />
         <TabButton
-          icon="cog"
+          emoji="⚙️"
           label="Settings"
           onPress={() => setIsMenuVisible(true)}
         />
@@ -289,6 +287,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerButton: {
     width: 40,
