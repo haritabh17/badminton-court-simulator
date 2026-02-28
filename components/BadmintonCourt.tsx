@@ -117,7 +117,7 @@ export default function BadmintonCourt() {
         </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
           <Text style={styles.headerTitle}>Badminton Court Simulator</Text>
-          <Text style={{ fontSize: 10, color: '#999' }}>beta-9</Text>
+          <Text style={{ fontSize: 10, color: '#999' }}>beta-10</Text>
         </View>
         <TouchableOpacity onPress={resetPositions} style={styles.headerButton}>
           <Text style={{ fontSize: 20 }}>🔄</Text>

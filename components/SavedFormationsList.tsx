@@ -103,11 +103,13 @@ export function SavedFormationsList({ onLoad, refreshTrigger }: SavedFormationsL
                 <IconButton
                   icon="play-circle-outline"
                   size={24}
+                  iconColor="#2196F3"
                   onPress={() => handleLoad(formation)}
                 />
                 <IconButton
                   icon="delete-outline"
                   size={24}
+                  iconColor="#f44336"
                   onPress={() => handleDelete(formation)}
                 />
               </View>
