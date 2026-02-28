@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert, Text } from 'react-native';
+import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert, Text, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { PlayerMarker } from './PlayerMarker';
 import { useCourtPositions } from '../hooks/useCourtPositions';
 import { PositionTrail } from './PositionTrail';
@@ -106,16 +106,18 @@ export default function BadmintonCourt() {
     }
   };
 
+  const statusBarHeight = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0;
+
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: statusBarHeight, height: 56 + statusBarHeight }]}>
         <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.headerButton}>
           <Text style={{ fontSize: 22 }}>☰</Text>
         </TouchableOpacity>
         <View style={{ alignItems: 'center' }}>
           <Text style={styles.headerTitle}>Badminton Court Simulator</Text>
-          <Text style={{ fontSize: 10, color: '#999' }}>beta-8</Text>
+          <Text style={{ fontSize: 10, color: '#999' }}>beta-9</Text>
         </View>
         <TouchableOpacity onPress={resetPositions} style={styles.headerButton}>
           <Text style={{ fontSize: 20 }}>🔄</Text>
