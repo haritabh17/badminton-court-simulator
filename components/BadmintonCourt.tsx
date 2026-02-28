@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { Appbar, Text as PaperText } from 'react-native-paper';
 import { PlayerMarker } from './PlayerMarker';
 import { IconButton } from './IconButton';
@@ -7,6 +7,9 @@ import { useCourtPositions } from '../hooks/useCourtPositions';
 import { PositionTrail } from './PositionTrail';
 import { SettingsPanel } from './SettingsPanel';
 import { useMarkerCustomization } from '../context/MarkerCustomizationContext';
+import ViewShot from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library';
 
 export default function BadmintonCourt() {
   const screenWidth = Dimensions.get('window').width;
@@ -22,6 +25,50 @@ export default function BadmintonCourt() {
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const { customizations, updateMarkerCustomization } = useMarkerCustomization();
+  const courtRef = useRef<ViewShot>(null);
+
+  const handleShare = async () => {
+    try {
+      if (!courtRef.current?.capture) return;
+      const uri = await courtRef.current.capture();
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'image/png',
+          dialogTitle: 'Share Formation',
+        });
+      } else {
+        // Fallback: save to gallery
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status === 'granted') {
+          await MediaLibrary.saveToLibraryAsync(uri);
+          Alert.alert('Saved!', 'Formation saved to your gallery.');
+        } else {
+          Alert.alert('Permission needed', 'Please allow access to save the image.');
+        }
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+      Alert.alert('Error', 'Failed to share formation.');
+    }
+  };
+
+  const handleSaveToGallery = async () => {
+    try {
+      if (!courtRef.current?.capture) return;
+      const uri = await courtRef.current.capture();
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status === 'granted') {
+        await MediaLibrary.saveToLibraryAsync(uri);
+        Alert.alert('Saved!', 'Formation saved to your gallery.');
+      } else {
+        Alert.alert('Permission needed', 'Please allow access to save the image.');
+      }
+    } catch (error) {
+      console.error('Save failed:', error);
+      Alert.alert('Error', 'Failed to save formation.');
+    }
+  };
 
   const {
     isDoubles,
@@ -51,7 +98,9 @@ export default function BadmintonCourt() {
       </Appbar.Header>
 
       <View style={[styles.courtWrapper, { marginBottom: BUTTON_CONTAINER_HEIGHT }]}>
-        <View 
+        <ViewShot
+          ref={courtRef}
+          options={{ format: 'png', quality: 1.0 }}
           style={[
             styles.courtContainer, 
             { 
@@ -142,7 +191,7 @@ export default function BadmintonCourt() {
             onSizeChange={(size) => updateMarkerCustomization('Shuttle', { size })}
             onIconChange={(icon) => updateMarkerCustomization('Shuttle', { icon })}
           />
-        </View>
+        </ViewShot>
       </View>
 
       <View style={[styles.buttonContainer, { 
@@ -198,6 +247,23 @@ export default function BadmintonCourt() {
               icon="badminton"
               onPress={toggleShuttleTrail}
               active={showShuttleTrail}
+            />
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        {/* Share group */}
+        <View style={styles.buttonGroupContainer}>
+          <PaperText variant="labelSmall" style={styles.buttonGroupLabel}>Share</PaperText>
+          <View style={styles.buttonGroup}>
+            <IconButton
+              icon="share-variant"
+              onPress={handleShare}
+            />
+            <IconButton
+              icon="content-save"
+              onPress={handleSaveToGallery}
             />
           </View>
         </View>
