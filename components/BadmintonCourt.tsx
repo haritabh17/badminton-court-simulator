@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
-import { Appbar, Text as PaperText } from 'react-native-paper';
+import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert, Animated } from 'react-native';
+import { Text as PaperText } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { PlayerMarker } from './PlayerMarker';
-import { IconButton } from './IconButton';
 import { useCourtPositions } from '../hooks/useCourtPositions';
 import { PositionTrail } from './PositionTrail';
 import { SettingsPanel } from './SettingsPanel';
@@ -10,17 +10,47 @@ import { useMarkerCustomization } from '../context/MarkerCustomizationContext';
 import { SaveFormationModal } from './SaveFormationModal';
 import { saveFormation, SavedFormation } from '../utils/formationStorage';
 
+// Telegram-style tab button
+function TabButton({ icon, label, onPress, active, disabled }: {
+  icon: string;
+  label: string;
+  onPress: () => void;
+  active?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.tabButton, disabled && styles.tabButtonDisabled]}
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.6}
+    >
+      <MaterialCommunityIcons
+        name={icon as any}
+        size={24}
+        color={active ? '#2196F3' : disabled ? '#ccc' : '#8e8e93'}
+      />
+      <PaperText style={[
+        styles.tabLabel,
+        active && styles.tabLabelActive,
+        disabled && styles.tabLabelDisabled,
+      ]}>
+        {label}
+      </PaperText>
+    </TouchableOpacity>
+  );
+}
+
 export default function BadmintonCourt() {
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
   
-  const BUTTON_CONTAINER_HEIGHT = 75;
-  const BANNER_HEIGHT = 50;
-  const availableHeight = screenHeight - 2.2*BUTTON_CONTAINER_HEIGHT - BANNER_HEIGHT;
+  const TAB_BAR_HEIGHT = 56;
+  const HEADER_HEIGHT = 56;
+  const availableHeight = screenHeight - TAB_BAR_HEIGHT - HEADER_HEIGHT - 20;
   
-  // Without rotation, use normal width/height mapping
-  const courtWidth = screenWidth;      // Container width matches screen width
-  const courtHeight = availableHeight; // Container height matches available height
+  const courtWidth = screenWidth;
+  const courtHeight = availableHeight;
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
@@ -63,7 +93,6 @@ export default function BadmintonCourt() {
   const handleLoadFormation = (formation: SavedFormation) => {
     const doLoad = () => {
       loadFormation(formation.positionHistory, formation.isDoubles);
-      // Restore customizations
       Object.entries(formation.customizations).forEach(([key, value]) => {
         updateMarkerCustomization(key as any, value);
       });
@@ -85,22 +114,20 @@ export default function BadmintonCourt() {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header style={styles.banner}>
-        <Appbar.Action icon="menu" onPress={() => setIsMenuVisible(true)} />
-        <Appbar.Content title="Badminton Court Simulator" />
-        <Appbar.Action icon="content-save" onPress={() => setIsSaveModalVisible(true)} />
-      </Appbar.Header>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.headerButton}>
+          <MaterialCommunityIcons name="menu" size={24} color="#000" />
+        </TouchableOpacity>
+        <PaperText style={styles.headerTitle}>Badminton Court Simulator</PaperText>
+        <TouchableOpacity onPress={resetPositions} style={styles.headerButton}>
+          <MaterialCommunityIcons name="refresh" size={24} color="#000" />
+        </TouchableOpacity>
+      </View>
 
-      <View style={[styles.courtWrapper, { marginBottom: BUTTON_CONTAINER_HEIGHT }]}>
-        <View 
-          style={[
-            styles.courtContainer, 
-            { 
-              width: courtWidth, 
-              height: courtHeight,
-            }
-          ]}
-        >
+      {/* Court */}
+      <View style={styles.courtWrapper}>
+        <View style={[styles.courtContainer, { width: courtWidth, height: courtHeight }]}>
           <Image
             source={require('../assets/badminton-court.png')}
             style={styles.courtImage}
@@ -186,63 +213,46 @@ export default function BadmintonCourt() {
         </View>
       </View>
 
-      <View style={[styles.buttonContainer, { 
-        height: BUTTON_CONTAINER_HEIGHT,
-        bottom: 4
-      }]}>
-        {/* Left group: Game setup */}
-        <View style={styles.buttonGroupContainer}>
-          <PaperText variant="labelSmall" style={styles.buttonGroupLabel}>Game Setup</PaperText>
-          <View style={styles.buttonGroup}>
-            <IconButton
-              icon="refresh"
-              onPress={resetPositions}
-            />
-            <IconButton
-              icon={isDoubles ? "account-group" : "account"}
-              onPress={() => toggleGameMode(!isDoubles)}
-            />
-          </View>
-        </View>
+      {/* FAB - Save Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setIsSaveModalVisible(true)}
+        activeOpacity={0.8}
+      >
+        <MaterialCommunityIcons name="content-save" size={26} color="#fff" />
+      </TouchableOpacity>
 
-        <View style={styles.divider} />
-
-        {/* Center group: History Navigation */}
-        <View style={styles.buttonGroupContainer}>
-          <PaperText variant="labelSmall" style={styles.buttonGroupLabel}>History</PaperText>
-          <View style={styles.buttonGroup}>
-            <IconButton
-              icon="undo"
-              onPress={undo}
-              disabled={!canUndo}
-            />
-            <IconButton
-              icon="redo"
-              onPress={redo}
-              disabled={!canRedo}
-            />
-          </View>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Right group: Trail Markers */}
-        <View style={styles.buttonGroupContainer}>
-          <PaperText variant="labelSmall" style={styles.buttonGroupLabel}>Trails</PaperText>
-          <View style={styles.buttonGroup}>
-            <IconButton
-              icon="shoe-print"
-              onPress={togglePlayerTrails}
-              active={showPlayerTrails}
-            />
-            <IconButton
-              icon="badminton"
-              onPress={toggleShuttleTrail}
-              active={showShuttleTrail}
-            />
-          </View>
-        </View>
-              </View>
+      {/* Bottom Tab Bar */}
+      <View style={styles.tabBar}>
+        <TabButton
+          icon={isDoubles ? "account-group" : "account"}
+          label={isDoubles ? "Doubles" : "Singles"}
+          onPress={() => toggleGameMode(!isDoubles)}
+        />
+        <TabButton
+          icon="undo"
+          label="Undo"
+          onPress={undo}
+          disabled={!canUndo}
+        />
+        <TabButton
+          icon="redo"
+          label="Redo"
+          onPress={redo}
+          disabled={!canRedo}
+        />
+        <TabButton
+          icon="shoe-print"
+          label="Trails"
+          onPress={togglePlayerTrails}
+          active={showPlayerTrails}
+        />
+        <TabButton
+          icon="cog"
+          label="Settings"
+          onPress={() => setIsMenuVisible(true)}
+        />
+      </View>
 
       <SettingsPanel
         isVisible={isMenuVisible}
@@ -263,14 +273,41 @@ export default function BadmintonCourt() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
   },
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    height: 56,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e0e0e0',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#000',
+  },
+  // Court
   courtWrapper: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
   },
   courtContainer: {
     position: 'relative',
@@ -279,52 +316,55 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  buttonContainer: {
+  // FAB
+  fab: {
     position: 'absolute',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 12,
-    marginHorizontal: 10,
-    width: '100%',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
+    right: 20,
+    bottom: 76,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2196F3',
     justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#2196F3',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
   },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  divider: {
-    width: 1,
-    height: '60%',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  },
-  banner: {
-    width: '100%',
+  // Tab Bar
+  tabBar: {
+    flexDirection: 'row',
+    height: 56,
     backgroundColor: '#ffffff',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e0e0e0',
+    paddingHorizontal: 4,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  buttonGroupLabel: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  buttonGroupContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  tabButton: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 6,
   },
-}); 
+  tabButtonDisabled: {
+    opacity: 0.4,
+  },
+  tabLabel: {
+    fontSize: 10,
+    color: '#8e8e93',
+    marginTop: 2,
+  },
+  tabLabelActive: {
+    color: '#2196F3',
+  },
+  tabLabelDisabled: {
+    color: '#ccc',
+  },
+});
