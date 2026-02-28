@@ -179,6 +179,18 @@ export function useCourtPositions(courtDimensions: CourtDimensions) {
     setShowShuttleTrail(prev => !prev);
   }, []);
 
+  const loadFormation = useCallback((
+    history: PositionState[],
+    doubles: boolean
+  ) => {
+    setIsDoubles(doubles);
+    setPositionHistory(history);
+    setCurrentIndex(history.length - 1);
+    setTempPosition(null);
+  }, []);
+
+  const hasUnsavedChanges = positionHistory.length > 1;
+
   return {
     isDoubles,
     playerPositions: tempPosition?.players || positionHistory[currentIndex]?.players || getInitialPositions(isDoubles, courtDimensions),
@@ -202,5 +214,8 @@ export function useCourtPositions(courtDimensions: CourtDimensions) {
     showShuttleTrail,
     togglePlayerTrails,
     toggleShuttleTrail,
+    positionHistory,
+    loadFormation,
+    hasUnsavedChanges,
   };
 } 

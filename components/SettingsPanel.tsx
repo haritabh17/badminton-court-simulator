@@ -17,6 +17,8 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMarkerCustomization, MarkerId, IconType } from '../context/MarkerCustomizationContext';
 import { IconCustomizationModal } from './IconCustomizationModal';
+import { SavedFormationsList } from './SavedFormationsList';
+import { SavedFormation } from '../utils/formationStorage';
 
 // Reusable component for player/shuttle items
 interface MarkerItemProps {
@@ -242,9 +244,11 @@ function MarkerItem({ markerId, title, customizations, updateMarkerCustomization
 interface SettingsPanelProps {
   isVisible: boolean;
   onClose: () => void;
+  onLoadFormation?: (formation: SavedFormation) => void;
+  refreshTrigger?: number;
 }
 
-export function SettingsPanel({ isVisible, onClose }: SettingsPanelProps) {
+export function SettingsPanel({ isVisible, onClose, onLoadFormation, refreshTrigger }: SettingsPanelProps) {
   const { customizations, updateMarkerCustomization, resetCustomizations } = useMarkerCustomization();
   const [isExpanded, setIsExpanded] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -300,6 +304,16 @@ export function SettingsPanel({ isVisible, onClose }: SettingsPanelProps) {
             bounces={false}
             decelerationRate="normal"
           >
+        {onLoadFormation && (
+          <SavedFormationsList
+            onLoad={(formation) => {
+              onLoadFormation(formation);
+              onClose();
+            }}
+            refreshTrigger={refreshTrigger}
+          />
+        )}
+
         <Card style={styles.card}>
           <Card.Content>
             <Title>Player Customization</Title>

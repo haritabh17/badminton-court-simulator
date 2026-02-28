@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { Appbar, Text as PaperText } from 'react-native-paper';
 import { PlayerMarker } from './PlayerMarker';
 import { IconButton } from './IconButton';
@@ -7,6 +7,8 @@ import { useCourtPositions } from '../hooks/useCourtPositions';
 import { PositionTrail } from './PositionTrail';
 import { SettingsPanel } from './SettingsPanel';
 import { useMarkerCustomization } from '../context/MarkerCustomizationContext';
+import { SaveFormationModal } from './SaveFormationModal';
+import { saveFormation, SavedFormation } from '../utils/formationStorage';
 
 export default function BadmintonCourt() {
   const screenWidth = Dimensions.get('window').width;
@@ -21,6 +23,8 @@ export default function BadmintonCourt() {
   const courtHeight = availableHeight; // Container height matches available height
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { customizations, updateMarkerCustomization } = useMarkerCustomization();
 
   const {
@@ -41,13 +45,50 @@ export default function BadmintonCourt() {
     showShuttleTrail,
     togglePlayerTrails,
     toggleShuttleTrail,
+    positionHistory,
+    loadFormation,
+    hasUnsavedChanges,
   } = useCourtPositions({ width: courtWidth, height: courtHeight });
+
+  const handleSaveFormation = async (name: string) => {
+    try {
+      await saveFormation(name, isDoubles, positionHistory, customizations);
+      setRefreshTrigger(prev => prev + 1);
+      Alert.alert('Saved!', `"${name}" has been saved.`);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save formation.');
+    }
+  };
+
+  const handleLoadFormation = (formation: SavedFormation) => {
+    const doLoad = () => {
+      loadFormation(formation.positionHistory, formation.isDoubles);
+      // Restore customizations
+      Object.entries(formation.customizations).forEach(([key, value]) => {
+        updateMarkerCustomization(key as any, value);
+      });
+    };
+
+    if (hasUnsavedChanges) {
+      Alert.alert(
+        'Unsaved Changes',
+        'You have unsaved changes on the current court. Load anyway?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Load', onPress: doLoad },
+        ]
+      );
+    } else {
+      doLoad();
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Appbar.Header style={styles.banner}>
         <Appbar.Action icon="menu" onPress={() => setIsMenuVisible(true)} />
         <Appbar.Content title="Badminton Court Simulator" />
+        <Appbar.Action icon="content-save" onPress={() => setIsSaveModalVisible(true)} />
       </Appbar.Header>
 
       <View style={[styles.courtWrapper, { marginBottom: BUTTON_CONTAINER_HEIGHT }]}>
@@ -206,6 +247,14 @@ export default function BadmintonCourt() {
       <SettingsPanel
         isVisible={isMenuVisible}
         onClose={() => setIsMenuVisible(false)}
+        onLoadFormation={handleLoadFormation}
+        refreshTrigger={refreshTrigger}
+      />
+
+      <SaveFormationModal
+        visible={isSaveModalVisible}
+        onClose={() => setIsSaveModalVisible(false)}
+        onSave={handleSaveFormation}
       />
     </View>
   );
