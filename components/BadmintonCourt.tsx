@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert, Animated } from 'react-native';
-import { Text as PaperText, Icon } from 'react-native-paper';
+import { View, StyleSheet, Image, Dimensions, TouchableOpacity, Alert } from 'react-native';
+import { Text as PaperText, IconButton as PaperIconButton } from 'react-native-paper';
 import { PlayerMarker } from './PlayerMarker';
 import { useCourtPositions } from '../hooks/useCourtPositions';
 import { PositionTrail } from './PositionTrail';
@@ -24,10 +24,11 @@ function TabButton({ icon, label, onPress, active, disabled }: {
       disabled={disabled}
       activeOpacity={0.6}
     >
-      <Icon
-        source={icon}
-        size={24}
-        color={active ? '#2196F3' : disabled ? '#ccc' : '#8e8e93'}
+      <PaperIconButton
+        icon={icon}
+        size={22}
+        iconColor={active ? '#2196F3' : disabled ? '#ccc' : '#8e8e93'}
+        style={{ margin: 0, padding: 0, width: 28, height: 28 }}
       />
       <PaperText style={[
         styles.tabLabel,
@@ -115,13 +116,9 @@ export default function BadmintonCourt() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.headerButton}>
-          <Icon source="menu" size={24} color="#000" />
-        </TouchableOpacity>
+        <PaperIconButton icon="menu" size={24} iconColor="#000" onPress={() => setIsMenuVisible(true)} style={{ margin: 0 }} />
         <PaperText style={styles.headerTitle}>Badminton Court Simulator</PaperText>
-        <TouchableOpacity onPress={resetPositions} style={styles.headerButton}>
-          <Icon source="refresh" size={24} color="#000" />
-        </TouchableOpacity>
+        <PaperIconButton icon="refresh" size={24} iconColor="#000" onPress={resetPositions} style={{ margin: 0 }} />
       </View>
 
       {/* Court */}
@@ -218,7 +215,7 @@ export default function BadmintonCourt() {
         onPress={() => setIsSaveModalVisible(true)}
         activeOpacity={0.8}
       >
-        <Icon source="content-save" size={26} color="#fff" />
+        <PaperIconButton icon="content-save" size={26} iconColor="#fff" style={{ margin: 0 }} />
       </TouchableOpacity>
 
       {/* Bottom Tab Bar */}
