@@ -37,9 +37,9 @@ jobs:
 
       - name: Install Specific NDK Version
         run: |
-          echo "y" | sdkmanager --install "ndk;26.1.10909125"
-          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> $GITHUB_PATH
+          echo "y" | sdkmanager --install "ndk;28.0.13004108"
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/28.0.13004108" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/ndk/28.0.13004108" >> $GITHUB_PATH
 
       - name: Accept Android Licenses
         run: yes | sdkmanager --licenses
@@ -63,7 +63,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm install -g react-native-cli
 
       - name: Generate Expo Assets
